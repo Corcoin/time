@@ -79,17 +79,35 @@
                     postalCode: formData.get('recipientPostalCode'),
                     countryCode: formData.get('recipientCountryCode')
                 },
-                amount: formData.get('amount')
+                amount: formData.get('amount'),
+                currencyCode: "USD",
+                localTransactionDateTime: new Date().toISOString(),
+                businessApplicationId: "AA",
+                acquirerCountryCode: "840",
+                acquiringBin: "408999",
+                retrievalReferenceNumber: "412770451018",
+                systemsTraceAuditNumber: "451018",
+                merchantCategoryCode: "6012",
+                sourceOfFundsCode: "01",
+                transactionIdentifier: Date.now().toString()
             };
 
-            fetch('/api/transfer', {
+            fetch('https://sandbox.api.visa.com/visadirect/fundstransfer/v1/multipushfundstransactions', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Basic ' + btoa('your_user_id:your_password'),
+                    'Visa-DPS-Correlation-Id': 'some-correlation-id',
+                    'X-Client-Transaction-ID': 'unique-client-id'
                 },
                 body: JSON.stringify(data)
             })
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok ' + response.statusText);
+                }
+                return response.json();
+            })
             .then(result => {
                 document.getElementById('result').textContent = JSON.stringify(result, null, 2);
             })
